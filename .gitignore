@@ -1,0 +1,8 @@
+
+/server-maven.iml
+/.idea/
+/core/target/
+/core/core.iml
+/web/target/
+/web/web.iml
+/src/

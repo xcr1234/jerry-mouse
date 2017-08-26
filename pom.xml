@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.jerrymouse</groupId>
+    <artifactId>server</artifactId>
+    <version>1.0</version>
+
+    <properties>
+        <file.encoding>UTF-8</file.encoding>
+        <jdk.version>1.6</jdk.version>
+        <!-- 文件拷贝时的编码 -->
+        <project.build.sourceEncoding>${file.encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${file.encoding}</project.reporting.outputEncoding>
+        <!-- 编译时的编码 -->
+        <maven.compiler.encoding>${file.encoding}</maven.compiler.encoding>
+    </properties>
+
+    <packaging>pom</packaging>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                    <configuration>
+                        <source>${jdk.version}</source>
+                        <target>${jdk.version}</target>
+                        <showWarnings>true</showWarnings>
+                        <encoding>${file.encoding}</encoding>
+                    </configuration>
+                    <inherited>true</inherited>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <modules>
+        <module>core</module>
+        <module>web</module>
+    </modules>
+
+</project>
