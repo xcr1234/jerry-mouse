@@ -11,7 +11,7 @@ import java.util.*;
 
 public class Application extends LifecyleSupport implements Config.Application{
     private Class c;
-    private Properties properties;
+
     private StaticManage staticManage = new DefaultStaticManage();
     private WebServer server;
     private String context;
@@ -31,18 +31,8 @@ public class Application extends LifecyleSupport implements Config.Application{
     private final Set<String> extensionsSet = new HashSet<String>();
 
 
-    public Application(Class c, Properties properties) {
+    public Application(Class c) {
         this.c = c;
-        this.properties = properties;
-        this.server = new WebServer(this);
-        context = properties.get(CONTEXT);
-
-        if(context == null || context.isEmpty()){
-            context = "/";
-        }
-        if(!context.startsWith("/")){
-            context =  "/"  + context;
-        }
     }
 
     public ServletContext getServletContext() {
@@ -87,6 +77,15 @@ public class Application extends LifecyleSupport implements Config.Application{
 
     @Override
     protected void doInit(Properties properties) throws LifecyleException {
+        this.server = new WebServer(this);
+        context = properties.get(CONTEXT);
+
+        if(context == null || context.isEmpty()){
+            context = "/";
+        }
+        if(!context.startsWith("/")){
+            context =  "/"  + context;
+        }
         dirView = properties.getBool(DIR_VIEW);
         logConn = properties.getBool(LOG_CONN);
         String enc = properties.get(ENCODING);

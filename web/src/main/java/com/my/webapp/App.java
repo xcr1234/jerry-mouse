@@ -2,20 +2,21 @@ package com.my.webapp;
 
 
 import com.jerry.mouse.Config;
-import com.jerry.mouse.JerryMouseApplication;
+import com.jerry.mouse.core.Application;
+import com.jerry.mouse.startup.JerryMouseApplication;
 import com.jerry.mouse.api.FreeMarkerSupport;
 import com.jerry.mouse.api.StaticResource;
 import com.jerry.mouse.api.WelComeFiles;
 import com.jerry.mouse.util.Properties;
 
-import java.nio.charset.Charset;
+import java.util.concurrent.FutureTask;
 
 @WelComeFiles({"index.htm","index.html"})
 @FreeMarkerSupport(mapping = "/freemarker",base = "template")
 @StaticResource(prefix = "/",target = "static")
 public class App {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
 
 
 
@@ -24,9 +25,13 @@ public class App {
         properties.put(Config.Application.CONTEXT,"/app");
         properties.put(Config.Application.ENCODING,"UTF-8");    //在应用级别设置系统编码格式，防止中文乱码
 
-        JerryMouseApplication.run(App.class,properties);
+        FutureTask<Application> futureTask = JerryMouseApplication.run(App.class,properties);
 
+        futureTask.get();
         JerryMouseApplication.start("http://localhost:8080/app");
+
+
+
     }
 
 }
