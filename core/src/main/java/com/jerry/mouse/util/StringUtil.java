@@ -54,4 +54,18 @@ public class StringUtil {
         DecimalFormat decimalFormat = new DecimalFormat(".0");
         return decimalFormat.format(value);
     }
+
+    public static String formatSize(long fsize){
+        if(fsize < 512){
+            return (fsize + " B");
+        }else if(fsize < 524288){
+            return (round(fsize / 1024) + " KB");
+        }else if(fsize < 536870912){
+            return (round(fsize / 1048576) + " MB");
+        }else {
+            return (round(fsize / 1073741824) + " GB");
+        }
+    }
+
+
 }

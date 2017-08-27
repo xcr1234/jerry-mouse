@@ -257,6 +257,15 @@ public class RequestImpl implements Request {
     }
 
     @Override
+    public String getContextPath() {
+        String context =  application.getContext();
+        if(context.startsWith("/")){
+            return context;
+        }
+        return  "/" + context;
+    }
+
+    @Override
     public List<FileItem> getFileItems() {
         return fileItems;
     }

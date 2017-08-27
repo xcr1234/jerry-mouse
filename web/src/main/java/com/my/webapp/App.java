@@ -24,6 +24,7 @@ public class App {
         Properties properties = new Properties();
         properties.put(Config.Server.PORT,8080);
         properties.put(Config.Application.CONTEXT,"/app");
+        properties.put(Config.Application.DIR_VIEW,true);
         properties.put(Config.Application.LOG_CONN,true);
         properties.put(Config.Application.ENCODING,"UTF-8");    //在应用级别设置系统编码格式，防止中文乱码
 
