@@ -193,7 +193,7 @@ public class RequestImpl implements Request {
 
     @Override
     public Collection<Cookie> getCookies() {
-        return cookieMap.values();
+        return Collections.unmodifiableCollection(cookieMap.values());
     }
 
     @Override

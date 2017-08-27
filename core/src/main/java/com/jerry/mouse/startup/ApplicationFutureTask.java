@@ -10,7 +10,6 @@ import java.util.concurrent.FutureTask;
 public class ApplicationFutureTask extends FutureTask<Application> {
 
     private ApplicationStartListener listener;
-    private Throwable t;
 
     public ApplicationStartListener getListener() {
         return listener;
@@ -24,27 +23,20 @@ public class ApplicationFutureTask extends FutureTask<Application> {
         super(new ApplicationCallable(c,properties));
     }
 
-    @Override
-    protected void setException(Throwable t) {
-        this.t = t;
-        super.setException(t);
-        if(listener != null){
-            listener.onError(t);
-        }
-    }
+
 
 
 
     @Override
     protected void done() {
-        if(t == null && listener != null){
+        if( listener != null){
             try {
                 Application application = get();
                 listener.onComplete(application);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                listener.onError(e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                listener.onError(e.getCause());
             }
         }
     }

@@ -9,7 +9,7 @@ public class DefaultApplicationStartListener implements ApplicationStartListener
     private static Log log = LogFactory.getLog(JerryMouseApplication.class);
     @Override
     public void onError(Throwable t) {
-        log.error(t.getMessage(),t);
+        log.error(t.getLocalizedMessage(),t);
     }
 
     @Override

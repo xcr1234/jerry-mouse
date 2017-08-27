@@ -8,7 +8,10 @@ import com.jerry.mouse.api.WebServlet;
 @WebServlet("/index.html")
 public class IndexAction implements Servlet {
 
+    public IndexAction(){
 
+    }
+    
     @Override
     public void service(Request request, Response response) throws Exception {
         request.putAttr("template","index.ftl");
