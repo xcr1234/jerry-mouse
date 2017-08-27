@@ -132,7 +132,7 @@ public class ResponseImpl implements Response {
         }
         Session session = request.getSession(false);
         if (session != null) {
-            String sessionId = request.getSession().getId();
+            String sessionId = session.getId();
             Cookie c = new Cookie(application.getSessionCookieName(), sessionId);
             c.setMaxAge(application.getSessionMaxAge());//session过期时间
             c.setHttpOnly(true);
