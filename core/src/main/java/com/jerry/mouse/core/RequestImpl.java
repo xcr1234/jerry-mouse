@@ -15,7 +15,6 @@ import org.apache.commons.io.IOUtils;
 import java.io.*;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,15 +48,9 @@ public class RequestImpl implements Request {
             headers.put(entry.getKey(),entry.getValue());
         }
 
-        //解析报文
-        this.in = new StreamReuse(exchange.getRequestBody());
-        int contentLength = getContentLength();
         String encoding = getCharacterEncoding();
-        if(contentLength > 0){
-            this.in.mark(contentLength);
-        }else{
-            this.in.mark(Integer.MAX_VALUE);
-        }
+        int contentLength = getContentLength();
+
         String query = getRequestURI().getRawQuery();
         if(query != null && !query.isEmpty()){
             String[] querys = query.split("&");
@@ -71,22 +64,25 @@ public class RequestImpl implements Request {
             }
         }
 
-        RequestContext requestContext = new JerryMouseRequestContext(this);
-
+        RequestContext requestContext = new RequestUploadContext(this);
         if(FileUploadBase.isMultipartContent(requestContext)){
+            this.in = exchange.getRequestBody();
             ServerFileUpload fileUpload = new ServerFileUpload(requestContext);
             fileUpload.setFileItemFactory(new DiskFileItemFactory());
-
-                List<FileItem> fileItems = fileUpload.parseRequest();
-                this.fileItems = fileItems;
-                for(FileItem fileItem : fileItems){
-                    if(fileItem.isFormField()){
-                        parameterMap.put(fileItem.getFieldName(),fileItem.getString(encoding));
-                    }
+            List<FileItem> fileItems = fileUpload.parseRequest();
+            this.fileItems = fileItems;
+            for(FileItem fileItem : fileItems){
+                if(fileItem.isFormField()){
+                    parameterMap.put(fileItem.getFieldName(),fileItem.getString(encoding));
                 }
-
+            }
         }else{
-
+            this.in = new StreamReuse(exchange.getRequestBody());
+            if(contentLength > 0){
+                this.in.mark(contentLength);
+            }else{
+                this.in.mark(Integer.MAX_VALUE);
+            }
             String res = IOUtils.toString(this.in,encoding);
             if(res != null && !res.isEmpty()){
                 String[] querys = res.split("&");
@@ -99,13 +95,10 @@ public class RequestImpl implements Request {
                     }
                 }
             }
+            this.in.reset();
         }
 
 
-
-
-
-        this.in.reset();
     }
 
     @Override
@@ -183,11 +176,11 @@ public class RequestImpl implements Request {
         if(cookie == null){
             if(create){
                 String setSessionId = UUID.randomUUID().toString();
-                return SessionImpl.getSession(setSessionId);
+                return application.getSessionManager().getSession(setSessionId);
             }
             return null;
         }else{
-            return SessionImpl.getSession(cookie.getValue());
+            return application.getSessionManager().getSession(cookie.getValue());
         }
     }
 

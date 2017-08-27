@@ -12,18 +12,8 @@ public class SessionImpl implements Session {
 
     private String id;
     private Map<String,Object> map = new ConcurrentHashMap<String, Object>();
-    private static Map<String,Session> sessionMap = new ConcurrentHashMap<String, Session>();
 
-    synchronized static Session getSession(String id){
-        Session session = sessionMap.get(id);
-        if(session == null){
-            session = new SessionImpl(id);
-            sessionMap.put(id,session);
-        }
-        return session;
-    }
-
-    private SessionImpl(String id) {
+    SessionImpl(String id) {
         this.id = id;
     }
 

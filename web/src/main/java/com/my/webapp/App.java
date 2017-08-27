@@ -20,7 +20,7 @@ public class App {
     public static void main(String[] args) {
 
 
-        String context = "/";
+        String context = "/web";
         Properties properties = new Properties();
         properties.put(Config.Server.PORT,8080);
         properties.put(Config.Application.CONTEXT,context);
@@ -32,7 +32,7 @@ public class App {
 
         try {
             futureTask.get();
-            //JerryMouseApplication.start("http://localhost:8080" + context);
+            JerryMouseApplication.start("http://localhost:8080" + context);
 
         } catch (InterruptedException e) {
 

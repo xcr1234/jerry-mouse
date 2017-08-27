@@ -6,11 +6,11 @@ import com.jerry.mouse.util.upload.RequestContext;
 
 import java.io.InputStream;
 
-public class JerryMouseRequestContext implements RequestContext {
+public class RequestUploadContext implements RequestContext {
 
     private Request request;
 
-    public JerryMouseRequestContext(Request request) {
+    public RequestUploadContext(Request request) {
         this.request = request;
     }
 

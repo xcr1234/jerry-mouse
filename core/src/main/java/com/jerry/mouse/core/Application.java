@@ -29,7 +29,7 @@ public class Application extends LifecyleSupport implements Config.Application{
 
     private final List<ServletContextListener> listeners = new ArrayList<ServletContextListener>();
     private final Set<String> extensionsSet = new HashSet<String>();
-
+    private SessionManager sessionManager = new DefaultSessionManager();
 
     public Application(Class c) {
         this.c = c;
@@ -73,6 +73,14 @@ public class Application extends LifecyleSupport implements Config.Application{
 
     public void setStaticManage(StaticManage staticManage) {
         this.staticManage = staticManage;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
+
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     @Override
