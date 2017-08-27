@@ -28,8 +28,8 @@ public class ResponseImpl implements Response {
     private Integer status;
 
 
-    public ResponseImpl(ServletContext servletContext, Request request, Application application) {
-        this.servletContext = servletContext;
+    public ResponseImpl(Request request, Application application) {
+        this.servletContext = application.getServletContext();
         this.application = application;
         this.request = request;
         this.out = new ByteArrayOutputStream();

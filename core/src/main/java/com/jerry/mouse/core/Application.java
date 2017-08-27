@@ -217,11 +217,15 @@ public class Application extends LifecyleSupport implements Config.Application{
     }
 
     Servlet getServlet(String path){
-        if(path.startsWith(context)){
+        if(!"/".equals(context) &&  path.startsWith(context)){
             int i = path.indexOf(context);
             path = path.substring(i + context.length());
         }
         return servletMap.get(path);
+    }
+
+    Servlet getNotFoundServlet(){
+        return servletMap.get("/404");
     }
 
     Servlet getDefaultServlet(){
@@ -246,6 +250,13 @@ public class Application extends LifecyleSupport implements Config.Application{
             path = "/" + path;
         }
         servletMap.put(path,servlet);
+    }
+
+    Servlet removeSerlvet(String path){
+        if(!path.startsWith("/")){
+            path = "/" + path;
+        }
+        return servletMap.remove(path);
     }
 
     public Set<String> getExtensionsSet() {

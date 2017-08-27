@@ -20,6 +20,9 @@ public class ServletContextImpl implements ServletContext {
 
     @Override
     public Servlet getServlet(String path){
+        if(path == null){
+            throw new IllegalArgumentException("null path!");
+        }
         return application.getServlet(path);
     }
     @Override
@@ -28,11 +31,24 @@ public class ServletContextImpl implements ServletContext {
     }
     @Override
     public void addServlet(String path,Servlet servlet){
-        if(path == null || servlet == null){
-            throw new IllegalArgumentException("null argument!");
+        if(path == null){
+            throw new IllegalArgumentException("null path!");
+        }
+        if(servlet == null){
+            throw new IllegalArgumentException("null servlet!");
         }
         application.addServlet(path,servlet);
     }
+
+
+    @Override
+    public Servlet removeServlet(String path) {
+        if(path == null){
+            throw new IllegalArgumentException("null path!");
+        }
+        return application.removeSerlvet(path);
+    }
+
     @Override
     public void setLogConn(boolean logConn) {
         application.setLogConn(logConn);

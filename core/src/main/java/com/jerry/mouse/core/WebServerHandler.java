@@ -33,35 +33,43 @@ class WebServerHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        RequestImpl request;
+        ResponseImpl response;
+
         try{
-            RequestImpl request = new RequestImpl(exchange,application.getServletContext(),application);
-            ResponseImpl response = new ResponseImpl(application.getServletContext(),request,application);
-            //找到servlet
-            String path = exchange.getRequestURI().getPath();
-            if(application.isLogConn()){
-                log.debug(exchange.getRequestMethod() + " " + path);
-            }
-            handle(path,request,response,exchange);
+            request = new RequestImpl(exchange,application);
         }catch (Exception e){
-            if(e instanceof IOException){
-                throw (IOException)e;
-            }
-            log.error(e);
+            throw new IOException("failed to create request object.",e);
         }
+        try{
+            response = new ResponseImpl(request,application);
+        }catch (Exception e){
+            throw new IOException("failed to create response object.",e);
+        }
+        String path = exchange.getRequestURI().getPath();
+        if(application.isLogConn()){
+            log.debug(exchange.getRequestMethod() + " " + path);
+        }
+
+        this.handle(path,request,response,exchange);
+
     }
 
-    private void handle(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange){
-        //构造request和response
+    private void handle(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException {
         try{
             Servlet servlet = application.getServlet(path);
             if(servlet == null){    //如果找不到，则重定向到默认servlet
-                handle(application.getDefaultServlet(),request,response,exchange);
+                Servlet defaultServlet = application.getDefaultServlet();
+                if(defaultServlet == null){
+                    throw new IOException("can't find [/default] mapping!");
+                }
+                handle(defaultServlet,request,response,exchange);
                 return;
             }
             //执行servlet
             handle(servlet,request,response,exchange);
         }catch (Exception e){
-            e.printStackTrace();
+            throw new IOException(e);
         }
     }
 
@@ -69,24 +77,25 @@ class WebServerHandler implements HttpHandler {
         try{
             servlet.service(request,response);
             if(response.getDispatch() != null){
-                Servlet s = application.getServlet(response.getDispatch());
-                if(s == null){
-                    s = application.getServlet("/404");
+                Servlet dispatchServlet = application.getServlet(response.getDispatch());
+                if(dispatchServlet == null){
+                    dispatchServlet = application.getNotFoundServlet();
                 }
-                if(s == null){
-                    throw new IOException("can't find [/404] mapping!");
+                if(dispatchServlet == null){
+                    throw new IOException("can't find [/404] NotFoundServlet mapping!");
                 }
-                response.dispatch(null);
-                handle(s,request,response,exchange);
+                response.dispatch(null);     //clear dispatch
+                this.handle(dispatchServlet,request,response,exchange);
                 return;
             }
             response.writeTo(exchange);
         }catch (Exception e){
-            if(servlet.equals(application.getErrorServlet())){
-                throw new IOException(e);
+            Servlet errorServlet = application.getErrorServlet();
+            if(servlet.equals(errorServlet)){
+                throw new IOException("an error occurred in [/error] ErrorServlet",e);
             }
             request.setError(e);
-            handle(application.getErrorServlet(),request,response,exchange);
+            this.handle(errorServlet,request,response,exchange);
         }finally {
             exchange.close();
         }

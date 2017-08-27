@@ -14,6 +14,22 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 默认的Servlet处理器，当一个url请求找不到对应的Servlet时，就会重定向到DefaultServlet，DefaultServlet的url-mapping始终是/default。
+ * DefaultServlet必须支持的几个功能：
+ * 处理欢迎页，{@link DefaultServlet#handleWelcomeFile(String, Request, Response)}，如果配置了{@link com.jerry.mouse.api.WelComeFiles}注解。
+ * 处理目录访问，如果{@link com.jerry.mouse.Config.Application#DIR_VIEW}为true。
+ * 处理静态资源，{@link DefaultServlet#handleStaticResource(String, Request, Response)}，如果配置了{@link com.jerry.mouse.api.StaticResource}注解
+ * 处理404页面，{@link DefaultServlet#handleNotFound(Request, Response)}
+ *
+ * 用户可以创建子类，继承DefaultServlet类，覆盖上面几个方法，来实现自己的处理过程。记得将自定义的Servlet映射为/default
+ * 例子：
+ * {@code @WebServlet("/default")}
+ * class MyDefaultServlet extends DefaultServlet{
+ *
+ *
+ * }
+ */
 public class DefaultServlet implements ApplicationAwareServlet {
 
     protected boolean handleWelcomeFile(String path,Request request, Response response) throws Exception {
@@ -132,20 +148,24 @@ public class DefaultServlet implements ApplicationAwareServlet {
         return true;
     }
 
-    protected void handleNotFound(Request request,Response response) {
-        response.dispatch("/404");
+    protected void handleNotFound(Request request,Response response) throws Exception {
+        Servlet servlet = application.getNotFoundServlet();
+        servlet.service(request,response);
     }
 
 
     @Override
-    public void service(Request request, Response response) throws Exception {
+    public final void service(Request request, Response response) throws Exception {
 
         String context = application.getContext();
-        String path =request. getRequestURI().getPath();
-        if( path.startsWith(context)){
+        String path = request. getRequestURI().getPath();
+        if(path.startsWith(context)){
+
             int i = path.indexOf(context);
             path = path.substring(i + context.length());
         }
+
+
 
         if("".equals(path) || "/".equals(path)){
             if(handleWelcomeFile("/",request,response)){

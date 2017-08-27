@@ -31,9 +31,9 @@ public class RequestImpl implements Request {
     private List<FileItem> fileItems;
 
 
-    public RequestImpl(HttpExchange exchange,ServletContext servletContext,Application application) throws IOException, FileUploadException {
+    public RequestImpl(HttpExchange exchange,Application application) throws IOException, FileUploadException {
         this.exchange = exchange;
-        this.servletContext = servletContext;
+        this.servletContext = application.getServletContext();
         this.application = application;
         Headers requestHeader = exchange.getRequestHeaders();
 
@@ -276,6 +276,7 @@ public class RequestImpl implements Request {
         map.putAll(parameterMap);
         map.putAll(this.map);
         map.put("basePath",getBasePath());
+        map.put("contextPath",getContextPath());
         map.put("parameterScope",Collections.unmodifiableMap(parameterMap));
         map.put("attrScope",Collections.unmodifiableMap(this.map));
         map.put("request",this);

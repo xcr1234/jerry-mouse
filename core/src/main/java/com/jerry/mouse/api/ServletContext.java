@@ -28,6 +28,8 @@ public interface ServletContext {
 
     void addServlet(String path, Servlet servlet);
 
+    Servlet removeServlet(String path);
+
     void setLogConn(boolean logConn);
 
     void setWelComeFiles(List<String> welComeFiles);
