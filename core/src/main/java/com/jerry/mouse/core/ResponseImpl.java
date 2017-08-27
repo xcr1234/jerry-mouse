@@ -6,6 +6,7 @@ import com.jerry.mouse.util.StringUtil;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import java.io.*;
 
 import java.nio.charset.Charset;
