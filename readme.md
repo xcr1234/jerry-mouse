@@ -27,7 +27,7 @@ public class MyWebApp {
         properties.put(Config.Application.CONTEXT,"/app");
         properties.put(Config.Application.ENCODING,"UTF-8");     
                                    // 在应用级别设置编码格式，可有效防止中文乱码
-        JerryMouseApplication.run(App.class,properties);    // 启动Application
+        JerryMouseApplication.run(MyWebApp.class,properties);    // 启动Application
    }      
    
 }
