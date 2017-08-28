@@ -4,13 +4,12 @@ import com.jerry.mouse.api.*;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-public class RequestDispatcherImpl implements RequestDispatcher{
+class RequestDispatcherImpl implements RequestDispatcher{
 
     private String path;
     private RequestImpl request;
@@ -18,7 +17,7 @@ public class RequestDispatcherImpl implements RequestDispatcher{
     private HttpExchange exchange;
     private WebServerHandler handler;
 
-    public RequestDispatcherImpl(String path, RequestImpl request,  HttpExchange exchange, WebServerHandler handler) {
+    RequestDispatcherImpl(String path, RequestImpl request,  HttpExchange exchange, WebServerHandler handler) {
         this.path = path;
         this.request = request;
         this.exchange = exchange;
@@ -27,12 +26,12 @@ public class RequestDispatcherImpl implements RequestDispatcher{
 
     @Override
     public void forward(Response response) throws IOException {
-        handler.handle(path,request, (ResponseImpl) response,exchange,true);
+        handler.handlePath(path,request, (ResponseImpl) response,exchange,true);
     }
 
     @Override
     public void include(Response response) throws IOException {
-        handler.handle(path,request,new IncludeResponseImpl((ResponseImpl) response),exchange,true);
+        handler.handlePath(path,request,new IncludeResponseImpl((ResponseImpl) response),exchange,true);
     }
 
     private static class IncludeResponseImpl extends ResponseImpl implements Response{

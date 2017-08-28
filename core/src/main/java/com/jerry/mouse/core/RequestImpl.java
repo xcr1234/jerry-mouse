@@ -212,7 +212,16 @@ public class RequestImpl implements Request {
     }
 
     private Exception error;
+    private Servlet errorServlet;
 
+    @Override
+    public Servlet getErrorServlet() {
+        return errorServlet;
+    }
+
+    public void setErrorServlet(Servlet errorServlet) {
+        this.errorServlet = errorServlet;
+    }
 
     @Override
     public Exception getError() {

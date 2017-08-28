@@ -56,6 +56,8 @@ public interface Request {
      */
     Exception getError();
 
+    Servlet getErrorServlet();
+
     int getContentLength();
 
     ServletContext getServletContext();

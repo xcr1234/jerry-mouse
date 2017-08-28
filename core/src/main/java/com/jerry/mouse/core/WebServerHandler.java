@@ -51,15 +51,13 @@ class WebServerHandler implements HttpHandler {
             log.debug(exchange.getRequestMethod() + " " + path);
         }
 
-        this.handle(path,request,response,exchange);
+        this.handlePath(path,request,response,exchange,false);
 
     }
 
-    void handle(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException {
-        handle(path,request,response,exchange,false);
-    }
 
-    void handle(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException {
+
+    void handlePath(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException {
         try{
             Servlet servlet = application.getServlet(path);
             if(servlet == null){    //如果找不到，则重定向到默认servlet
@@ -67,22 +65,22 @@ class WebServerHandler implements HttpHandler {
                 if(defaultServlet == null){
                     throw new IOException("can't find [/default] mapping!");
                 }
-                handle(defaultServlet,request,response,exchange,dispatch);
+                handleServlet(defaultServlet,request,response,exchange,dispatch);
                 return;
             }
             //执行servlet
-            handle(servlet,request,response,exchange,dispatch);
+            handleServlet(servlet,request,response,exchange,dispatch);
         }catch (Exception e){
             throw new IOException(e);
         }
     }
 
-    private void handle(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException{
-        handle(servlet,request,response,exchange,false);
+    private void handleServlet(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException{
+        handleServlet(servlet,request,response,exchange,false);
     }
 
 
-    private void handle(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException{
+    private void handleServlet(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException{
         try{
             servlet.service(request,response);
             response.finish();
@@ -92,10 +90,15 @@ class WebServerHandler implements HttpHandler {
         }catch (Exception e){
             Servlet errorServlet = application.getErrorServlet();
             if(servlet.equals(errorServlet)){
-                throw new IOException("an error occurred in [/error] ErrorServlet",e);
+                log.error("an error occurred in [/error] ErrorServlet",e);
             }
+            request.setErrorServlet(servlet);
             request.setError(e);
-            this.handle(errorServlet,request,response,exchange);
+            try{
+                this.handleServlet(errorServlet,request,response,exchange);
+            }catch (Exception ex){
+                log.error("an error occurred in [/error] ErrorServlet",ex);
+            }
         }finally {
             if(!dispatch){
                 exchange.close();
