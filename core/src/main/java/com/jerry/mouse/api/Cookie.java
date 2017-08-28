@@ -110,7 +110,7 @@ public class Cookie implements Serializable{
             sb.append("; domain=").append(domain);
         }
         if(maxAge != null){
-            sb.append("; expires=").append(StringUtil.getGMTDate(new Date(System.currentTimeMillis() + maxAge * 1000)));
+            sb.append("; expires=").append(StringUtil.getGMTDate(System.currentTimeMillis() + maxAge * 1000));
         }
         if(secure != null && secure){
             sb.append("; secure");

@@ -37,7 +37,7 @@ class WebServerHandler implements HttpHandler {
         ResponseImpl response;
 
         try{
-            request = new RequestImpl(exchange,application);
+            request = new RequestImpl(exchange,application,this);
         }catch (Exception e){
             throw new IOException("failed to create request object.",e);
         }
@@ -55,7 +55,11 @@ class WebServerHandler implements HttpHandler {
 
     }
 
-    private void handle(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException {
+    void handle(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException {
+        handle(path,request,response,exchange,false);
+    }
+
+    void handle(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException {
         try{
             Servlet servlet = application.getServlet(path);
             if(servlet == null){    //如果找不到，则重定向到默认servlet
@@ -63,32 +67,28 @@ class WebServerHandler implements HttpHandler {
                 if(defaultServlet == null){
                     throw new IOException("can't find [/default] mapping!");
                 }
-                handle(defaultServlet,request,response,exchange);
+                handle(defaultServlet,request,response,exchange,dispatch);
                 return;
             }
             //执行servlet
-            handle(servlet,request,response,exchange);
+            handle(servlet,request,response,exchange,dispatch);
         }catch (Exception e){
             throw new IOException(e);
         }
     }
 
     private void handle(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException{
+        handle(servlet,request,response,exchange,false);
+    }
+
+
+    private void handle(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException{
         try{
             servlet.service(request,response);
-            if(response.getDispatch() != null){
-                Servlet dispatchServlet = application.getServlet(response.getDispatch());
-                if(dispatchServlet == null){
-                    dispatchServlet = application.getNotFoundServlet();
-                }
-                if(dispatchServlet == null){
-                    throw new IOException("can't find [/404] NotFoundServlet mapping!");
-                }
-                response.dispatch(null);     //clear dispatch
-                this.handle(dispatchServlet,request,response,exchange);
-                return;
+            response.finish();
+            if(!dispatch){
+                response.writeTo(exchange);
             }
-            response.writeTo(exchange);
         }catch (Exception e){
             Servlet errorServlet = application.getErrorServlet();
             if(servlet.equals(errorServlet)){
@@ -97,9 +97,15 @@ class WebServerHandler implements HttpHandler {
             request.setError(e);
             this.handle(errorServlet,request,response,exchange);
         }finally {
-            exchange.close();
+            if(!dispatch){
+                exchange.close();
+            }
         }
 
     }
+
+
+
+
 
 }

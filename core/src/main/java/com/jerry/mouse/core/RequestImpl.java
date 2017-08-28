@@ -27,13 +27,15 @@ public class RequestImpl implements Request {
     private Map<String,String> parameterMap = new HashMap<String, String>();
     private HeaderMap headers = new HeaderMap();
     private final Application application;
+    private final WebServerHandler handler;
     private List<FileItem> fileItems;
 
 
-    public RequestImpl(HttpExchange exchange,Application application) throws IOException, FileUploadException {
+    public RequestImpl(HttpExchange exchange,Application application,WebServerHandler handler) throws IOException, FileUploadException {
         this.exchange = exchange;
         this.servletContext = application.getServletContext();
         this.application = application;
+        this.handler = handler;
         Headers requestHeader = exchange.getRequestHeaders();
 
         String cookie = requestHeader.getFirst("Cookie");
@@ -281,5 +283,13 @@ public class RequestImpl implements Request {
             map.put("sessionScope",Collections.emptyMap());
         }
         return Collections.unmodifiableMap(map);
+    }
+
+    @Override
+    public RequestDispatcher getDispatcher(String path) {
+        if(path == null || path.isEmpty()){
+            throw new IllegalArgumentException("null/empty path!");
+        }
+        return new RequestDispatcherImpl(path,this,exchange,handler);
     }
 }

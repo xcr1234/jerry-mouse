@@ -36,6 +36,13 @@ public class ResponseImpl implements Response {
         this.out = new ByteArrayOutputStream();
     }
 
+    protected ResponseImpl(ResponseImpl response){
+        this.out = response.out;
+        this.servletContext = response.servletContext;
+        this.application = response.application;
+        this.request = response.request;
+    }
+
     @Override
     public Object getAttr(String key) {
         return map.get(key);
@@ -111,18 +118,8 @@ public class ResponseImpl implements Response {
         return servletContext;
     }
 
-    private String dispatch;
 
-    @Override
-    public void dispatch(String path) {
-        this.dispatch = path;
-    }
-
-    String getDispatch() {
-        return dispatch;
-    }
-
-    void writeTo(HttpExchange exchange) throws IOException {
+    void finish() throws IOException{
 
         if (encoding != null && contentType == null) {
             addHeader("Content-Type", "text/html;charset=" + encoding);
@@ -146,6 +143,10 @@ public class ResponseImpl implements Response {
         addHeader("Connection", "keep-alive");
         addHeader("Keep-Alive", "timeout=20");
         addHeader("Date", StringUtil.getGMTDate());
+
+    }
+
+    void writeTo(HttpExchange exchange) throws IOException {
 
 
         Headers headers = exchange.getResponseHeaders();

@@ -3,11 +3,7 @@ package com.jerry.mouse.startup;
 
 import com.jerry.mouse.core.Application;
 import com.jerry.mouse.util.Properties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 
@@ -18,7 +14,7 @@ public class JerryMouseApplication {
     }
 	
 	public static FutureTask<Application> run(final Class<?> c , final Properties properties, final ApplicationStartListener listener) {
-        ApplicationFutureTask futureTask = new ApplicationFutureTask(c,properties);
+        ApplicationBootStrap futureTask = new ApplicationBootStrap(c,properties);
         futureTask.setListener(listener);
         futureTask.run();
         return futureTask.getFutureTask();
@@ -28,7 +24,7 @@ public class JerryMouseApplication {
     }
 
     public static FutureTask<Application> run(final Class<?> c , final java.util.Properties properties, final ApplicationStartListener listener) {
-        ApplicationFutureTask futureTask = new ApplicationFutureTask(c,new Properties(properties));
+        ApplicationBootStrap futureTask = new ApplicationBootStrap(c,new Properties(properties));
         futureTask.setListener(listener);
         futureTask.run();
         return futureTask.getFutureTask();

@@ -23,7 +23,7 @@ public class FreeMarkerServlet implements ApplicationAwareServlet {
         String contentType = (String) request.getAttr("contentType");
         String enc = (String) request.getAttr("encoding");
         if(template == null || template.isEmpty()){
-            response.dispatch("/404");
+            request.getDispatcher("/404").forward(response);
             return;
         }
         if(!template.toLowerCase().endsWith(".ftl")){

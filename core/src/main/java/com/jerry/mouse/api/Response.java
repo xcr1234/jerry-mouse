@@ -36,7 +36,4 @@ public interface Response {
     void sendRedirect(String target) throws IOException;
 
     ServletContext getServletContext();
-
-    void dispatch(String path);
-
 }

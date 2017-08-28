@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-public class ApplicationFutureTask  {
+public class ApplicationBootStrap {
 
     private ApplicationStartListener listener;
     private ApplicationCallable applicationCallable;
@@ -22,7 +22,7 @@ public class ApplicationFutureTask  {
         this.listener = listener;
     }
 
-    public ApplicationFutureTask(Class c, Properties properties){
+    public ApplicationBootStrap(Class c, Properties properties){
         applicationCallable = new ApplicationCallable(c,properties);
         futureTask = new FutureTask<Application>(applicationCallable){
             @Override

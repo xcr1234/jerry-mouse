@@ -66,6 +66,8 @@ public interface Request {
 
     String getContextPath();
 
+    RequestDispatcher getDispatcher(String path);
+
     /**
      * 在上传文件时，返回文件列表，表单必须是multipart/form-data，否则返回null。
      * 例子：

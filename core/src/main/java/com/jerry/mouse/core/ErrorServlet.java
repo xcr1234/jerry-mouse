@@ -12,7 +12,7 @@ import java.util.Date;
 class ErrorServlet implements Servlet {
     @Override
     public void service(Request request, Response response) throws IOException {
-        response.addHeader("Content-Type","text/html;charset=utf-8");
+        response.setContentType("text/html");
         response.setStatus(500);
 
         Exception throwable = request.getError();

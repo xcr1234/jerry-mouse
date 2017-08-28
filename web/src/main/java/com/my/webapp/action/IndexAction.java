@@ -15,6 +15,6 @@ public class IndexAction implements Servlet {
     @Override
     public void service(Request request, Response response) throws Exception {
         request.putAttr("template","index.ftl");
-        response.dispatch("/freemarker");
+        request.getDispatcher("/freemarker").forward(response);
     }
 }

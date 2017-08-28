@@ -19,6 +19,6 @@ public class LoginAction implements Servlet{
             request.putAttr("message","登录失败！");
         }
         request.putAttr("template","index");
-        response.dispatch("/freemarker");
+        request.getDispatcher("/freemarker").forward(response);
     }
 }
