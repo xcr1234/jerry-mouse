@@ -21,7 +21,7 @@ public class JerryMouseApplication {
         ApplicationFutureTask futureTask = new ApplicationFutureTask(c,properties);
         futureTask.setListener(listener);
         futureTask.run();
-        return futureTask;
+        return futureTask.getFutureTask();
     }
     public static FutureTask<Application> run(final Class<?> c , final java.util.Properties properties){
         return run(c, new Properties(properties), new DefaultApplicationStartListener());
@@ -31,7 +31,7 @@ public class JerryMouseApplication {
         ApplicationFutureTask futureTask = new ApplicationFutureTask(c,new Properties(properties));
         futureTask.setListener(listener);
         futureTask.run();
-        return futureTask;
+        return futureTask.getFutureTask();
     }
 
 

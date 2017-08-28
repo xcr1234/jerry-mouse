@@ -5,11 +5,13 @@ import java.util.*;
 
 public class CaseInsensitiveMap<V> implements Map<String,V>,Serializable {
 
+    private static final long serialVersionUID = -8269094973183168477L;
     private Map<StringIgnoreCase,V> map = new HashMap<StringIgnoreCase, V>();
 
 
     private static class StringIgnoreCase implements Serializable{
 
+        private static final long serialVersionUID = -5199433063967504563L;
         private String value;
 
         StringIgnoreCase(String value) {

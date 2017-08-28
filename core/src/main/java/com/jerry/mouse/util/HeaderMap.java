@@ -7,7 +7,9 @@ import java.util.List;
 public class HeaderMap extends CaseInsensitiveMap<List<String>> {
 
 
-    public void put(String key,String value){
+    private static final long serialVersionUID = -354281886860344454L;
+
+    public void put(String key, String value){
         List<String> list = get(key);
         if(list == null){
             list = new LinkedList<String>();

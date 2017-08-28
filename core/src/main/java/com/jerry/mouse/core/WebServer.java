@@ -68,8 +68,7 @@ class WebServer extends LifecyleSupport implements Config.Server{
 
     @Override
     protected void doDestroy() throws LifecyleException {
-        httpserver.stop(1);
-        this.executor.shutdown();
+        httpserver.stop(0);
     }
 
     String getPath(){

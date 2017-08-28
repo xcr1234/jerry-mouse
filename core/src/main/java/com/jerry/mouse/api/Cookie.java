@@ -13,8 +13,8 @@ import java.util.StringTokenizer;
  */
 public class Cookie implements Serializable{
 
-    private static final long serialVersionUID = 1L;
 
+    private static final long serialVersionUID = 1342204034404928345L;
     private String name;
     private String value;
     private String comment;
