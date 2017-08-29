@@ -22,8 +22,8 @@ public class MyWebApp {
 
 	public static void main(String[] args) throws Exception{
 	
-		Properties properties = new Properties();
-	    properties.put(Config.Server.PORT,8080);
+	Properties properties = new Properties();
+	properties.put(Config.Server.PORT,8080);
         properties.put(Config.Application.CONTEXT,"/app");
         properties.put(Config.Application.ENCODING,"UTF-8");     
                                    // 在应用级别设置编码格式，可有效防止中文乱码
