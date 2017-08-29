@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface WelComeFiles {
-    String[] value();
+    String[] value() default {"index.htm","index.html"};
 }
