@@ -3,13 +3,13 @@ package com.jerry.mouse.core;
 import java.io.InputStream;
 import java.net.URL;
 
-public class StaticManage {
+public class StaticManager {
 
     private String target;
     private String prefix;
     private int expires;
 
-    public StaticManage(String target, String prefix) {
+    public StaticManager(String target, String prefix) {
         if(target.endsWith("/")){
             target = target.substring(0,target.length() - 1);
         }

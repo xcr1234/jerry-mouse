@@ -1,13 +1,13 @@
-package com.jerry.mouse.core;
+package com.jerry.mouse.server;
 
 import com.jerry.mouse.api.*;
+import com.jerry.mouse.server.Application;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.Map;
 
 public class FreeMarkerServlet implements ApplicationAwareServlet {
@@ -23,7 +23,7 @@ public class FreeMarkerServlet implements ApplicationAwareServlet {
         String contentType = (String) request.getAttr("contentType");
         String enc = (String) request.getAttr("encoding");
         if(template == null || template.isEmpty()){
-            request.getDispatcher("/404").forward(response);
+            request.getRequestDispatcher("/404").forward(request,response);
             return;
         }
         if(!template.toLowerCase().endsWith(".ftl")){
@@ -47,7 +47,7 @@ public class FreeMarkerServlet implements ApplicationAwareServlet {
 
     @Override
     public void setApplication(Application application) {
-        FreeMarkerSupport freeMarkerSupport = application.getFreeMarkerSupport();
+        FreeMarkerSupport freeMarkerSupport = (FreeMarkerSupport) application.getMainClass().getAnnotation(FreeMarkerSupport.class);
         configuration = new Configuration(Configuration.VERSION_2_3_26);
         this.encoding = freeMarkerSupport.encoding().isEmpty() ? application.getEncoding() : freeMarkerSupport.encoding();
         configuration.setDefaultEncoding(this.encoding);

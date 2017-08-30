@@ -1,6 +1,7 @@
 package com.jerry.mouse.core;
 
 import com.jerry.mouse.api.*;
+import com.jerry.mouse.server.Application;
 import com.jerry.mouse.util.HeaderMap;
 import com.jerry.mouse.util.StringUtil;
 import com.sun.net.httpserver.Headers;
@@ -9,7 +10,6 @@ import com.sun.net.httpserver.HttpExchange;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import java.io.*;
 
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,22 +22,23 @@ public class ResponseImpl implements Response {
     private final ByteArrayOutputStream out;
     private final ServletContext servletContext;
     private final Application application;
-    private final Request request;
+    private Request request;
     private PrintWriter writer;
     private String encoding;
     private String contentType;
     private Integer status;
+    private final HttpExchange exchange;
 
-
-    public ResponseImpl(Request request, Application application) {
+    public ResponseImpl(Application application,HttpExchange exchange) {
         this.servletContext = application.getServletContext();
         this.application = application;
-        this.request = request;
+        this.exchange = exchange;
         this.out = new ByteArrayOutputStream();
     }
 
     protected ResponseImpl(ResponseImpl response){
         this.out = response.out;
+        this.exchange = response.exchange;
         this.servletContext = response.servletContext;
         this.application = response.application;
         this.request = response.request;
@@ -87,6 +88,10 @@ public class ResponseImpl implements Response {
         this.status = status;
     }
 
+    public void setRequest(Request request) {
+        this.request = request;
+    }
+
     @Override
     public OutputStream getOutputStream() {
         return out;
@@ -119,7 +124,9 @@ public class ResponseImpl implements Response {
     }
 
 
-    void finish() throws IOException{
+
+
+    public void flush() throws IOException{
 
         if (encoding != null && contentType == null) {
             addHeader("Content-Type", "text/html;charset=" + encoding);
@@ -146,7 +153,7 @@ public class ResponseImpl implements Response {
 
     }
 
-    void writeTo(HttpExchange exchange) throws IOException {
+    public void writeTo(HttpExchange exchange) throws IOException {
 
 
         Headers headers = exchange.getResponseHeaders();
@@ -166,5 +173,9 @@ public class ResponseImpl implements Response {
         }
 
 
+    }
+
+    public void close(){
+        exchange.close();
     }
 }

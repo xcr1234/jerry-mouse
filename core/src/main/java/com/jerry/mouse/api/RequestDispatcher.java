@@ -1,9 +1,10 @@
 package com.jerry.mouse.api;
 
+
 import java.io.IOException;
 
 public interface RequestDispatcher {
-    void forward(Response response) throws IOException;
+    void forward(Request request,Response response) throws IOException;
 
-    void include(Response response) throws IOException;
+    void include(Request request,Response response) throws IOException;
 }

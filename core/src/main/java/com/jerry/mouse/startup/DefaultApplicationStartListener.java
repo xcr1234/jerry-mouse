@@ -1,6 +1,8 @@
 package com.jerry.mouse.startup;
 
-import com.jerry.mouse.core.Application;
+
+
+import com.jerry.mouse.server.Server;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,7 +15,7 @@ public class DefaultApplicationStartListener implements ApplicationStartListener
     }
 
     @Override
-    public void onComplete(Application application) {
-        log.info("application start up successfully in " + (System.currentTimeMillis() - time) + " ms.");
+    public void onComplete(Server server) {
+        log.info("Server start up successfully in " + (System.currentTimeMillis() - time) + " ms.");
     }
 }

@@ -1,6 +1,7 @@
 package com.jerry.mouse.api;
 
-import com.jerry.mouse.core.Application;
+
+import com.jerry.mouse.server.Application;
 
 /**
  * 在ApplicationAwareServlet中可以拿到全局的Application对象，setApplication方法可以用作Servlet的初始化（load-on-startup）

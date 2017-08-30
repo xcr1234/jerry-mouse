@@ -1,66 +1,60 @@
 package com.jerry.mouse.core;
 
-import com.jerry.mouse.api.*;
+import com.jerry.mouse.api.Cookie;
+import com.jerry.mouse.api.Request;
+import com.jerry.mouse.api.RequestDispatcher;
+import com.jerry.mouse.api.Response;
+import com.jerry.mouse.server.Application;
+import com.jerry.mouse.server.ApplicationServerHandler;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
-import java.util.Map;
-import java.util.Set;
 
-class RequestDispatcherImpl implements RequestDispatcher{
+public class RequestDispatcherImpl implements RequestDispatcher {
+
+
 
     private String path;
-    private RequestImpl request;
+    private ApplicationServerHandler handler;
 
-    private HttpExchange exchange;
-    private WebServerHandler handler;
 
-    RequestDispatcherImpl(String path, RequestImpl request,  HttpExchange exchange, WebServerHandler handler) {
+    public RequestDispatcherImpl(String path, Application application) {
         this.path = path;
-        this.request = request;
-        this.exchange = exchange;
-        this.handler = handler;
+        this.handler = application.getHandler();
     }
 
     @Override
-    public void forward(Response response) throws IOException {
-        handler.handlePath(path,request, (ResponseImpl) response,exchange,true);
+    public void forward(Request request, Response response) throws IOException {
+        this.handler.handlePath(path, (RequestImpl) request,new DispatchResponse((ResponseImpl) response),request.getExchange());
     }
 
     @Override
-    public void include(Response response) throws IOException {
-        handler.handlePath(path,request,new IncludeResponseImpl((ResponseImpl) response),exchange,true);
+    public void include(Request request, Response response) throws IOException {
+        this.handler.handlePath(path, (RequestImpl) request,new IncludeResponse((ResponseImpl) response),request.getExchange());
     }
 
-    private static class IncludeResponseImpl extends ResponseImpl implements Response{
 
-
-        private ResponseImpl response;
-
-        public IncludeResponseImpl(ResponseImpl response) {
+    private static class DispatchResponse extends ResponseImpl{
+        DispatchResponse(ResponseImpl response) {
             super(response);
         }
 
         @Override
-        public Object getAttr(String key) {
-            return response.getAttr(key);
+        public void writeTo(HttpExchange exchange) throws IOException {
+
         }
 
         @Override
-        public Object putAttr(String key, Object value) {
-            return response.putAttr(key,value);
-        }
+        public void close() {
 
-        @Override
-        public Object removeAttr(String key) {
-            return response.removeAttr(key);
         }
+    }
 
-        @Override
-        public Set<Map.Entry<String, Object>> attrSet() {
-            return response.attrSet();
+    private static class IncludeResponse extends DispatchResponse{
+
+        IncludeResponse(ResponseImpl response) {
+            super(response);
         }
 
         @Override
@@ -74,15 +68,9 @@ class RequestDispatcherImpl implements RequestDispatcher{
         }
 
         @Override
-        public PrintWriter getWriter() throws IOException {
-            return response.getWriter();
-        }
-
-        @Override
-        public void setStatus(int code) throws IOException {
+        public void setStatus(int status) throws IOException {
 
         }
-
 
         @Override
         public void setCharacterEncoding(String encoding) {
@@ -103,7 +91,6 @@ class RequestDispatcherImpl implements RequestDispatcher{
         public void sendRedirect(String target) throws IOException {
 
         }
-
-
     }
+
 }

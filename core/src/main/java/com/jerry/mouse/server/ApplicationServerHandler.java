@@ -1,92 +1,71 @@
-package com.jerry.mouse.core;
+package com.jerry.mouse.server;
 
-
-import com.jerry.mouse.api.*;
-
-import com.jerry.mouse.util.upload.FileItem;
-import com.jerry.mouse.util.upload.FileUploadException;
+import com.jerry.mouse.api.Servlet;
+import com.jerry.mouse.core.RequestImpl;
+import com.jerry.mouse.core.ResponseImpl;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-class WebServerHandler implements HttpHandler {
+public class ApplicationServerHandler implements HttpHandler {
+
+    private Log log = LogFactory.getLog(ApplicationServerHandler.class);
 
     private Application application;
+    private Server server;
 
-
-    private Log log = LogFactory.getLog(WebServerHandler.class);
-
-
-    public WebServerHandler(Application application) {
+    public ApplicationServerHandler(Application application, Server server) {
         this.application = application;
+        this.server = server;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         RequestImpl request;
         ResponseImpl response;
-
         try{
-            request = new RequestImpl(exchange,application,this);
-        }catch (Exception e){
-            throw new IOException("failed to create request object.",e);
-        }
-        try{
-            response = new ResponseImpl(request,application);
+            response = new ResponseImpl(application,exchange);
         }catch (Exception e){
             throw new IOException("failed to create response object.",e);
         }
+        try{
+            request = new RequestImpl(exchange,application);
+        }catch (Exception e){
+            throw new IOException("failed to create request object.",e);
+        }
+        response.setRequest(request);
         String path = exchange.getRequestURI().getPath();
         if(application.isLogConn()){
             log.debug(exchange.getRequestMethod() + " " + path);
         }
-
-        this.handlePath(path,request,response,exchange,false);
-
+        this.handlePath(path,request,response,exchange);
     }
 
-
-
-    void handlePath(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException {
-        try{
+    public void handlePath(String path,RequestImpl request,ResponseImpl response,HttpExchange exchange){
+        try {
             Servlet servlet = application.getServlet(path);
-            if(servlet == null){    //如果找不到，则重定向到默认servlet
+            if(servlet == null){
                 Servlet defaultServlet = application.getDefaultServlet();
                 if(defaultServlet == null){
                     throw new IOException("can't find [/default] mapping!");
                 }
-                handleServlet(defaultServlet,request,response,exchange,dispatch);
+                handleServlet(defaultServlet,request,response,exchange);
                 return;
             }
-            //执行servlet
-            handleServlet(servlet,request,response,exchange,dispatch);
+            handleServlet(servlet,request,response,exchange);
         }catch (Exception e){
-            throw new IOException(e);
+            log.error("an unexpected error occurred.",e);
         }
     }
 
     private void handleServlet(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange) throws IOException{
-        handleServlet(servlet,request,response,exchange,false);
-    }
-
-
-    private void handleServlet(Servlet servlet, RequestImpl request,ResponseImpl response,HttpExchange exchange,boolean dispatch) throws IOException{
         try{
             servlet.service(request,response);
-            response.finish();
-            if(!dispatch){
-                response.writeTo(exchange);
-            }
+            response.flush();
+            response.writeTo(exchange);
         }catch (Exception e){
             Servlet errorServlet = application.getErrorServlet();
             if(servlet.equals(errorServlet)){
@@ -100,15 +79,9 @@ class WebServerHandler implements HttpHandler {
                 log.error("an error occurred in [/error] ErrorServlet",ex);
             }
         }finally {
-            if(!dispatch){
-                exchange.close();
-            }
+            response.close();
         }
-
     }
-
-
-
 
 
 }

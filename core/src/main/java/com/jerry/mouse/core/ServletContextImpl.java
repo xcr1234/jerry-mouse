@@ -1,7 +1,9 @@
 package com.jerry.mouse.core;
 
+import com.jerry.mouse.api.RequestDispatcher;
 import com.jerry.mouse.api.Servlet;
 import com.jerry.mouse.api.ServletContext;
+import com.jerry.mouse.server.Application;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -46,25 +48,9 @@ public class ServletContextImpl implements ServletContext {
         if(path == null){
             throw new IllegalArgumentException("null path!");
         }
-        return application.removeSerlvet(path);
+        return application.removeServlet(path);
     }
 
-    @Override
-    public void setLogConn(boolean logConn) {
-        application.setLogConn(logConn);
-    }
-    @Override
-    public void setWelComeFiles(List<String> welComeFiles) {
-        application.setWelComeFiles(welComeFiles);
-    }
-    @Override
-    public void setSessionMaxAge(int sessionMaxAge) {
-        application.setSessionMaxAge(sessionMaxAge);
-    }
-    @Override
-    public void setSessionCookieName(String sessionCookieName) {
-        application.setSessionCookieName(sessionCookieName);
-    }
 
     @Override
     public URL getResource(String name) {
@@ -94,6 +80,11 @@ public class ServletContextImpl implements ServletContext {
 
     @Override
     public Set<Map.Entry<String, Object>> attrSet() {
-        return null;
+        return map.entrySet();
+    }
+
+    @Override
+    public RequestDispatcher getRequestDispatcher(String path) {
+        return new RequestDispatcherImpl(path,application);
     }
 }

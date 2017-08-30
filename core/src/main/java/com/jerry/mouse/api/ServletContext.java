@@ -30,12 +30,6 @@ public interface ServletContext {
 
     Servlet removeServlet(String path);
 
-    void setLogConn(boolean logConn);
-
-    void setWelComeFiles(List<String> welComeFiles);
-
-    void setSessionMaxAge(int sessionMaxAge);
-
-    void setSessionCookieName(String sessionCookieName);
+    RequestDispatcher getRequestDispatcher(String path);
 
 }

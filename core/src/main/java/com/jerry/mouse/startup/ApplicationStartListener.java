@@ -1,9 +1,9 @@
 package com.jerry.mouse.startup;
 
-import com.jerry.mouse.core.Application;
+import com.jerry.mouse.server.Server;
 
 public interface ApplicationStartListener {
     void onError(Throwable t);
 
-    void onComplete(Application application);
+    void onComplete(Server application);
 }

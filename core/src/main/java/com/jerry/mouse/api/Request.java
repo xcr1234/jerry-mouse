@@ -1,5 +1,6 @@
 package com.jerry.mouse.api;
 import com.jerry.mouse.util.upload.FileItem;
+import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +22,8 @@ public interface Request {
 
     InputStream getInputStream();
 
+
+    HttpExchange getExchange();
 
     Object getAttr(String key);
 
@@ -68,7 +71,6 @@ public interface Request {
 
     String getContextPath();
 
-    RequestDispatcher getDispatcher(String path);
 
     /**
      * 在上传文件时，返回文件列表，表单必须是multipart/form-data，否则返回null。
@@ -88,5 +90,7 @@ public interface Request {
     List<FileItem> getFileItems();
 
     Map<String,Object> getDataModel();
+
+    RequestDispatcher getRequestDispatcher(String path);
 
 }

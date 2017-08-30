@@ -1,4 +1,4 @@
-package com.jerry.mouse.core;
+package com.jerry.mouse.server;
 
 import com.jerry.mouse.api.ApplicationAwareServlet;
 import com.jerry.mouse.api.Request;
@@ -24,7 +24,7 @@ import java.util.List;
  *
  * 用户可以创建子类，继承DefaultServlet类，覆盖上面几个方法，来实现自己的处理过程。记得将自定义的Servlet映射为/default
  * 例子：
- * {@code @WebServlet("/default")}
+ * @  WebServlet("/default")
  * class MyDefaultServlet extends DefaultServlet{
  *
  *
@@ -33,7 +33,7 @@ import java.util.List;
 public class DefaultServlet implements ApplicationAwareServlet {
 
     protected boolean handleWelcomeFile(String path,Request request, Response response) throws Exception {
-        List<String> welComeFiles = application.getWelComeFiles();
+        List<String> welComeFiles = application.welcomeFiles();
         for(String welComeFile : welComeFiles){
             Servlet servlet = application.getServlet(path + welComeFile);
             if(servlet != null){
@@ -99,7 +99,7 @@ public class DefaultServlet implements ApplicationAwareServlet {
 
 
     protected boolean handleStaticResource(String path,Request request,Response response) throws Exception {
-        URL url = application.getStaticManage().getResource(path);
+        URL url = application.getStaticManager().getResource(path);
         if(url == null){
             return false;
         }
@@ -111,7 +111,7 @@ public class DefaultServlet implements ApplicationAwareServlet {
             return false;
         }
         if(file.isDirectory()){
-            if(application.isDirView()){
+            if(application.viewDir()){
                 return handleDirView(file,path,request,response);
             }
             if(handleWelcomeFile(path,request,response)){
@@ -121,14 +121,14 @@ public class DefaultServlet implements ApplicationAwareServlet {
         }
         response.setContentType(contentType);
 
-        if(application.getExtensionsSet().contains(extension)){
+        if(application.cacheExtensions().contains(extension)){
             long modify = file.lastModified();
             String header = request.getFirstHeader("If-Modified-Since");
             Date date = StringUtil.parseGMT(header);
             if(date != null && modify - date.getTime() < 1000){
                 response.setStatus(304);
             }else{
-                response.addDateHeader("Expires",new Date(System.currentTimeMillis() + application.getStaticManage().getExpires() * 1000));
+                response.addDateHeader("Expires",new Date(System.currentTimeMillis() + application.getStaticManager().getExpires() * 1000));
                 response.addDateHeader("Last-Modified",new Date(modify));
                 InputStream in = url.openStream();
                 try{
@@ -185,7 +185,9 @@ public class DefaultServlet implements ApplicationAwareServlet {
 
     protected Application application;
 
-    public void setApplication(Application application){
+
+    @Override
+    public void setApplication(Application application) {
         this.application = application;
     }
 }

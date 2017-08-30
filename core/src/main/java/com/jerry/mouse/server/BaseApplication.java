@@ -1,26 +1,28 @@
-package com.jerry.mouse.core;
+package com.jerry.mouse.server;
 
-import com.jerry.mouse.Config;
 import com.jerry.mouse.api.*;
+import com.jerry.mouse.core.*;
 import com.jerry.mouse.util.ClassUtils;
 import com.jerry.mouse.util.Properties;
-
 
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class Application extends LifecyleSupport implements Config.Application{
+public class BaseApplication extends LifecyleSupport implements Application{
+
     private Class c;
+    private Server server;
 
-    private StaticManage staticManage = new DefaultStaticManage();
-    private WebServer server;
+    public BaseApplication(Class c,Server server) {
+        this.c = c;
+        this.server = server;
+    }
+    private StaticManager staticManager = new DefaultStaticManager();
     private String context;
-
+    private final ApplicationServerHandler handler = new ApplicationServerHandler(this,server);
     private final ServletContext servletContext = new ServletContextImpl(this);
-
-    private Map<String ,Servlet> servletMap = new HashMap<String, Servlet>();
-    private List<String> welComeFiles = new ArrayList<String>();
-
+    private final Map<String ,Servlet> servletMap = new HashMap<String, Servlet>();
+    private final List<String> welComeFiles = new ArrayList<String>();
     private boolean dirView = false;
     private boolean logConn = false;
     private int sessionMaxAge = 1800;
@@ -29,67 +31,16 @@ public class Application extends LifecyleSupport implements Config.Application{
 
     private final List<ServletContextListener> listeners = new ArrayList<ServletContextListener>();
     private final Set<String> extensionsSet = new HashSet<String>();
-    private SessionManager sessionManager = new DefaultSessionManager();
-
-    public Application(Class c) {
-        this.c = c;
-    }
-
-    public ServletContext getServletContext() {
-        return servletContext;
-    }
-
-    int getSessionMaxAge() {
-        return sessionMaxAge;
-    }
-
-    String getSessionCookieName() {
-        return sessionCookieName;
-    }
-
-    String getContext(){
-        return context;
-    }
-
-    StaticManage getStaticManage() {
-        return staticManage;
-    }
-
-    public void setWelComeFiles(List<String> welComeFiles) {
-        this.welComeFiles = welComeFiles;
-    }
-
-    public void setLogConn(boolean logConn) {
-        this.logConn = logConn;
-    }
-
-    public void setSessionMaxAge(int sessionMaxAge) {
-        this.sessionMaxAge = sessionMaxAge;
-    }
-
-    public void setSessionCookieName(String sessionCookieName) {
-        this.sessionCookieName = sessionCookieName;
-    }
-
-    public void setStaticManage(StaticManage staticManage) {
-        this.staticManage = staticManage;
-    }
-
-    public SessionManager getSessionManager() {
-        return sessionManager;
-    }
-
-    public void setSessionManager(SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
-    }
+    private final SessionManager sessionManager = new DefaultSessionManager();
 
     @Override
     protected void doInit(Properties properties) throws LifecyleException {
-        this.server = new WebServer(this);
-        context = properties.get(CONTEXT);
-
+        if(c.isAnnotationPresent(WebContext.class)){
+            WebContext webContext = (WebContext) c.getAnnotation(WebContext.class);
+            context = webContext.value();
+        }
         if(context == null || context.isEmpty()){
-            context = "/";
+            context = c.getSimpleName();
         }
         if(!context.startsWith("/")){
             context =  "/"  + context;
@@ -110,6 +61,8 @@ public class Application extends LifecyleSupport implements Config.Application{
                 }
                 logger.info("mapped " + Arrays.toString(webServlet.value()) + " to " + clazz);
             }
+
+
         }
         if(!servletMap.containsKey("/default")){
             Servlet defaultServlet = createServlet(DefaultServlet.class);
@@ -126,7 +79,6 @@ public class Application extends LifecyleSupport implements Config.Application{
         }
         if(c.isAnnotationPresent(FreeMarkerSupport.class)){
             FreeMarkerSupport freeMarkerSupport = (FreeMarkerSupport)c.getAnnotation(FreeMarkerSupport.class);
-            this.freeMarkerSupport = freeMarkerSupport;
             Servlet servlet = createServlet(FreeMarkerServlet.class);
             String mapping = freeMarkerSupport.mapping();
             if(!mapping.startsWith("/")){
@@ -137,8 +89,8 @@ public class Application extends LifecyleSupport implements Config.Application{
         }
         if(c.isAnnotationPresent(StaticResource.class)){
             StaticResource staticResource = (StaticResource) c.getAnnotation(StaticResource.class);
-            this.staticManage = new StaticManage(staticResource.target(),staticResource.prefix());
-            this.staticManage.setExpires(staticResource.expires());
+            this.staticManager = new StaticManager(staticResource.target(),staticResource.prefix());
+            this.staticManager.setExpires(staticResource.expires());
             logger.info("mapped static resources [" + staticResource.prefix() + "*] to classpath:/" + staticResource.target());
             Collections.addAll(extensionsSet,staticResource.cacheExtensions());
         }
@@ -162,57 +114,10 @@ public class Application extends LifecyleSupport implements Config.Application{
                 }
             }
         }
-
-        this.server.init(properties);
     }
 
-    private FreeMarkerSupport freeMarkerSupport;
 
-    public FreeMarkerSupport getFreeMarkerSupport() {
-        return freeMarkerSupport;
-    }
-
-    public boolean isDirView() {
-        return dirView;
-    }
-
-    boolean isLogConn() {
-        return logConn;
-    }
-
-    List<String> getWelComeFiles() {
-        return welComeFiles;
-    }
-
-    @Override
-    protected void doStart() throws LifecyleException {
-        this.server.start();
-        for(ServletContextListener listener :listeners){
-            try {
-                listener.onInit(servletContext);
-            } catch (Exception e) {
-                throw new LifecyleException(e);
-            }
-        }
-    }
-
-    @Override
-    protected void doDestroy() throws LifecyleException {
-        try{
-            this.server.destroy();
-        }finally {
-            for(ServletContextListener listener :listeners){
-                try {
-                    listener.onDestroy(servletContext);
-                } catch (Exception e) {
-
-                }
-            }
-        }
-
-    }
-
-    private Servlet createServlet(Class clazz) throws LifecyleException {
+    protected Servlet createServlet(Class clazz) throws LifecyleException {
         try{
             Servlet servlet = (Servlet) clazz.newInstance();
             if(servlet instanceof ApplicationAwareServlet){
@@ -224,7 +129,44 @@ public class Application extends LifecyleSupport implements Config.Application{
         }
     }
 
-    Servlet getServlet(String path){
+    @Override
+    protected void doStart() throws LifecyleException {
+
+    }
+
+    @Override
+    protected void doDestroy() throws LifecyleException {
+        for(ServletContextListener listener :listeners){
+            try {
+                listener.onDestroy(servletContext);
+            } catch (Exception e) {
+                logger.error("an error occurred while application was destroying",e);
+            }
+        }
+    }
+
+    @Override
+    public String getContext() {
+        return context;
+    }
+
+    @Override
+    public String getEncoding() {
+        return encoding;
+    }
+
+    @Override
+    public Class getMainClass() {
+        return c;
+    }
+
+    @Override
+    public List<String> welcomeFiles() {
+        return welComeFiles;
+    }
+
+    @Override
+    public Servlet getServlet(String path) {
         if(!"/".equals(context) &&  path.startsWith(context)){
             int i = path.indexOf(context);
             path = path.substring(i + context.length());
@@ -232,46 +174,83 @@ public class Application extends LifecyleSupport implements Config.Application{
         return servletMap.get(path);
     }
 
-    Servlet getNotFoundServlet(){
-        return servletMap.get("/404");
-    }
-
-    Servlet getDefaultServlet(){
-        return servletMap.get("/default");
-    }
-
-    Servlet getErrorServlet(){
+    @Override
+    public Servlet getErrorServlet() {
         return servletMap.get("/error");
     }
 
-    Collection<Servlet> getServlets(){
+    @Override
+    public Servlet getNotFoundServlet() {
+        return servletMap.get("/404");
+    }
+
+    @Override
+    public Servlet getDefaultServlet() {
+        return servletMap.get("/default");
+    }
+
+    public boolean isLogConn() {
+        return logConn;
+    }
+
+    @Override
+    public Collection<Servlet> getServlets() {
         return servletMap.values();
     }
 
-    String getBasePath(){
-        return server.getPath() + context + "/";
-    }
-
-
-    void addServlet(String path,Servlet servlet){
-        if(!path.startsWith("/")){
-            path = "/" + path;
-        }
+    @Override
+    public void addServlet(String path, Servlet servlet) {
         servletMap.put(path,servlet);
     }
 
-    Servlet removeSerlvet(String path){
-        if(!path.startsWith("/")){
-            path = "/" + path;
-        }
+    @Override
+    public Servlet removeServlet(String path) {
         return servletMap.remove(path);
     }
 
-    public Set<String> getExtensionsSet() {
+
+    @Override
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
+
+    @Override
+    public StaticManager getStaticManager() {
+        return staticManager;
+    }
+
+    @Override
+    public boolean viewDir() {
+        return dirView;
+    }
+
+    @Override
+    public Set<String> cacheExtensions() {
         return extensionsSet;
     }
 
-    public String getEncoding() {
-        return encoding;
+    @Override
+    public String getSessionCookieName() {
+        return sessionCookieName;
+    }
+
+    @Override
+    public int getSessionMaxAge() {
+        return sessionMaxAge;
+    }
+
+    @Override
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
+
+    @Override
+    public String getBasePath() {
+        return server.getPath() + context + "/";
+    }
+
+    @Override
+    public ApplicationServerHandler getHandler() {
+        return handler;
     }
 }

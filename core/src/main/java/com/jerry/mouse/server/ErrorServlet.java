@@ -1,4 +1,4 @@
-package com.jerry.mouse.core;
+package com.jerry.mouse.server;
 
 import com.jerry.mouse.api.Request;
 import com.jerry.mouse.api.Response;
@@ -11,7 +11,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class ErrorServlet implements Servlet {
+public class ErrorServlet implements Servlet {
 
     private static Log log = LogFactory.getLog(ErrorServlet.class);
 
